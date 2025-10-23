@@ -1,0 +1,19 @@
+.property-airbnb-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 20px !important;
+}
+
+.property-airbnb-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.property-airbnb-card .btn-light {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+}
+
+.property-airbnb-card .badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+}
