@@ -10,6 +10,7 @@ import {
     Form,
     Carousel,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { propertyService } from "../services/api";
 import type { Property } from "../types/properties";
 
@@ -30,6 +31,8 @@ const PublicPropertiesList: React.FC = () => {
         price_min: "",
         price_max: "",
     });
+
+    const navigate = useNavigate();
 
     // ✅ Obtener propiedades con filtros + paginación
     useEffect(() => {
@@ -70,6 +73,49 @@ const PublicPropertiesList: React.FC = () => {
     const transactionTypeTranslations: Record<string, string> = {
         rent: "En arriendo",
         sale: "En venta",
+    };
+
+    // Helper: decide si el click proviene de un elemento interactivo
+    const shouldIgnoreActivation = (target: EventTarget | null) => {
+        if (!(target instanceof Element)) return false;
+        // ignore if clicking on buttons, links, form controls, carousel controls/indicators, or any element with data-bs-target attrs
+        const interactiveSelectors = [
+            "button",
+            "a",
+            "input",
+            "select",
+            "textarea",
+            ".carousel-control-prev",
+            ".carousel-control-next",
+            ".carousel-indicators",
+            "[data-bs-target]",
+            "[data-bs-slide]",
+            ".carousel .carousel-indicators li",
+        ];
+        return interactiveSelectors.some((sel) => !!target.closest(sel));
+    };
+
+    // Activation (click or keyboard)
+    const activateProperty = (propertyId: number, e?: React.MouseEvent | React.KeyboardEvent) => {
+        // if event provided and originates from an interactive sub-element -> don't navigate
+        const evtTarget = e ? (e.target as EventTarget) : null;
+        if (evtTarget && shouldIgnoreActivation(evtTarget)) return;
+
+        // If mouse event with ctrl/cmd or middle click -> open new tab
+        if (e && "ctrlKey" in e && ((e as React.MouseEvent).ctrlKey || (e as React.MouseEvent).metaKey)) {
+            window.open(`/properties/${propertyId}`, "_blank", "noopener");
+            return;
+        }
+
+        // Otherwise use SPA navigation
+        navigate(`/properties/${propertyId}`);
+    };
+
+    const onCardKeyDown = (propertyId: number, e: React.KeyboardEvent) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            activateProperty(propertyId, e);
+        }
     };
 
     // UI de carga / error / sin resultados
@@ -216,7 +262,15 @@ const PublicPropertiesList: React.FC = () => {
                 <Row className="g-4">
                     {properties.map((property) => (
                         <Col key={property.id} xs={12} sm={6} md={4} lg={3}>
-                            <Card className="property-airbnb-card h-100 border-0 shadow-sm">
+                            {/* Make the whole card keyboard-accessible and clickable */}
+                            <Card
+                                as="article"
+                                role="button"
+                                tabIndex={0}
+                                className="property-airbnb-card h-100 border-0 shadow-sm clickable-card"
+                                onClick={(e: React.MouseEvent) => activateProperty(property.id, e)}
+                                onKeyDown={(e: React.KeyboardEvent) => onCardKeyDown(property.id, e)}
+                            >
                                 <div className="position-relative">
                                     {property.images && property.images.length > 0 ? (
                                         <Carousel
@@ -231,8 +285,7 @@ const PublicPropertiesList: React.FC = () => {
                                                 <Carousel.Item key={index}>
                                                     <img
                                                         src={`${BASE_URL}${img.image_url}`}
-                                                        alt={`Propiedad ${property.id} - Imagen ${index + 1
-                                                            }`}
+                                                        alt={`Propiedad ${property.id} - Imagen ${index + 1}`}
                                                         className="d-block w-100"
                                                         style={{
                                                             height: "220px",

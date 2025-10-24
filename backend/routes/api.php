@@ -19,12 +19,15 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->midd
 Route::get('/categories', [CategoryController::class, 'index']);
 
 // ✅ Rutas de propiedades
+Route::get('/properties/filtered', [PropertyController::class, 'getFilteredProperties']);
+
 Route::prefix('properties')->group(function () {
     Route::get('/', [PropertyController::class, 'index']);
     Route::get('/featured', [PropertyController::class, 'featured']);
     Route::get('/owner/{id}', [PropertyController::class, 'byOwner']);
     Route::get('/{id}', [PropertyController::class, 'show']);
 });
+
 
 Route::middleware('auth:sanctum')->prefix('properties')->group(function () {
     Route::post('/', [PropertyController::class, 'store']);

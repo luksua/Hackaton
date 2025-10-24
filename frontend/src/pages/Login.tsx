@@ -7,5 +7,5 @@ const Register: React.FC = () => {
         </main>
     );
 };
-  
+
 export default Register;

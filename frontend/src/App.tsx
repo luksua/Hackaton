@@ -18,6 +18,8 @@ import Login from './components/Login';
 import AddContractForm from './components/Contracts/AddContractForm';
 import PublicPropertiesList from './components/PublicPropertyList';
 import OwnerPropertiesList from './components/OwnerPropetiesList';
+import PropertyMap from './pages/Map';
+import PropertyDetailPage from './pages/PropertyDetailPage';
 
 function App() {
   return (
@@ -35,8 +37,10 @@ function App() {
             <Route path="/nosotros" element={<div>Página Nosotros - En construcción</div>} />
             <Route path="/contacto" element={<div>Página Contacto - En construcción</div>} />
             <Route path="/contratos" element={<AddContractForm />} />
+            <Route path="/mapa" element={<PropertyMap />} />
             {/* 👇 Vista del propietario */}
             <Route path="/owner/billing" element={<OwnerBillingPage />} />
+            <Route path="/properties/:id" element={<PropertyDetailPage />} />
 
             {/* 👇 Vista del inquilino */}
             <Route path="/tenant/billing" element={<TenantBillingPage />} />
