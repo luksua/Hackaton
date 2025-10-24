@@ -1,0 +1,69 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos del chat */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #f8f9fa;
+}
+
+.chat-header {
+  background-color: #1e4232;
+  color: white;
+  padding: 10px 15px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.chat-body {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+.message {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+}
+
+.message.sent {
+  background-color: #d1f5d3;
+  align-self: flex-end;
+}
+
+.message.received {
+  background-color: #e9ecef;
+  align-self: flex-start;
+}
+
+.chat-footer {
+  display: flex;
+  border-top: 1px solid #dee2e6;
+  padding: 10px;
+  background: white;
+}
+
+.chat-footer input {
+  flex: 1;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  padding: 8px 15px;
+}
+
+.chat-footer button {
+  border-radius: 50%;
+  margin-left: 10px;
+}

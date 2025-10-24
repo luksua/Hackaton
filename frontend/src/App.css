@@ -1,0 +1,199 @@
+/* Variables CSS personalizadas */
+
+body {
+  padding-top: 80px; /* ajusta según la altura real del navbar */
+}
+
+:root {
+  --primary: #1E4232;
+  --secondary: #3FA37B;
+  --secondary-hover: #2F5D62;
+  --accent: #8FD6B3;
+  --light-bg: #E6EAE9;
+  --dark-text: #1A1A1A;
+  --white: #FFFFFF;
+}
+
+/* Estilos personalizados */
+.btn-primary-custom {
+  background-color: var(--secondary);
+  border-color: var(--secondary);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+  background-color: var(--secondary-hover);
+  border-color: var(--secondary-hover);
+  transform: translateY(-2px);
+}
+
+.btn-outline-primary-custom {
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+.btn-outline-primary-custom:hover {
+  background-color: var(--secondary);
+  border-color: var(--secondary);
+  color: white;
+}
+
+.bg-primary-custom {
+  background-color: var(--primary) !important;
+}
+
+.text-primary-custom {
+  color: var(--primary) !important;
+}
+
+.border-primary-custom {
+  border-color: var(--primary) !important;
+}
+
+/* Hero Section Mejorada */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(143, 214, 179, 0.3) 0%, transparent 50%);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.search-form .form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(63, 163, 123, 0.25);
+  border-color: var(--secondary);
+}
+
+/* Property Cards Mejoradas */
+.property-card {
+  transition: all 0.3s ease;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.property-card:hover {
+  transform: translateY(-10px);
+}
+
+.property-image-container {
+  height: 250px;
+  overflow: hidden;
+}
+
+.property-image {
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.property-card:hover .property-image {
+  transform: scale(1.1);
+}
+
+.property-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 66, 50, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.property-card:hover .property-overlay {
+  opacity: 1;
+}
+
+/* Shapes decorativos */
+.hero-shapes .shape {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(143, 214, 179, 0.1);
+  z-index: 1;
+}
+
+.hero-shapes .shape-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -150px;
+}
+
+.hero-shapes .shape-2 {
+  width: 200px;
+  height: 200px;
+  bottom: 100px;
+  left: -100px;
+}
+
+.hero-shapes .shape-3 {
+  width: 150px;
+  height: 150px;
+  bottom: 200px;
+  right: 20%;
+}
+
+/* Animaciones */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.floating-card {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .display-3 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-stats .col-md-4 {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Utilidades adicionales */
+.shadow-hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.shadow-hover:hover {
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+}
+
+.rounded-3 {
+  border-radius: 1rem !important;
+}
+
+.fs-7 {
+  font-size: 0.875rem !important;
+}
+
+.icon-wrapper {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
