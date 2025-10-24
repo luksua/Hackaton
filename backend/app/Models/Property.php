@@ -8,10 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Property extends Model
 {
     use HasFactory;
-    
-    protected $casts = [
-        'is_featured' => 'boolean',
-    ];
 
     protected $fillable = [
         'owner_id',
@@ -24,6 +20,16 @@ class Property extends Model
         'bedrooms',
         'bathrooms',
         'is_featured',
+        'latitude',
+        'longitude',
+    ];
+
+    protected $casts = [
+        'is_featured' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'price' => 'float',
+        'area' => 'float',
     ];
 
     // Relaciones
@@ -57,7 +63,7 @@ class Property extends Model
     }
     // venta
     public function sale()
-{
-    return $this->hasOne(Sale::class);
-}   
+    {
+        return $this->hasOne(Sale::class);
+    }
 }

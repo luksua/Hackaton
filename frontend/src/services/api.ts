@@ -40,6 +40,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PropertyPayload = Record<string, any>;
+
 // 🏠 Servicio de propiedades
 export const propertyService = {
   /** Obtener propiedades destacadas */
@@ -59,10 +62,10 @@ export const propertyService = {
     return res.data;
   },
 
-getOwnerPropertiesList: async (ownerId: number): Promise<Property[]> => {
-  const res = await api.get(`/properties/owner/${ownerId}`);
-  return res.data.data; // 👈 devuelve solo el array
-},
+  getOwnerPropertiesList: async (ownerId: number): Promise<Property[]> => {
+    const res = await api.get(`/properties/owner/${ownerId}`);
+    return res.data.data; // 👈 devuelve solo el array
+  },
 
   /** Obtener una propiedad individual */
   getPropertyById: async (id: number): Promise<FeaturedProperty> => {
@@ -86,29 +89,133 @@ getOwnerPropertiesList: async (ownerId: number): Promise<Property[]> => {
   },
 
   /** Crear una nueva propiedad */
-  async createProperty(formData: FormData) {
-    const response = await axios.post("/properties", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return response.data.property;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createProperty: async (payload: Record<string, any>, images?: File[]) => {
+    // Si hay imágenes, usar FormData
+    const hasFiles = Array.isArray(images) && images.length > 0;
+    if (hasFiles) {
+      const form = new FormData();
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        form.append(k, String(v));
+      });
+      images.forEach((file) => form.append("images[]", file));
+      const res = await api.post("/properties", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data;
+    } else {
+      // JSON
+      const res = await api.post("/properties", payload);
+      return res.data;
+    }
   },
 
   /** Eliminar una propiedad */
   deleteProperty: async (id: number): Promise<void> => {
     await api.delete(`/properties/${id}`);
   },
-};
 
-// export const authService = {
-//   checkToken: async () => {
-//     try {
-//       const res = await api.get("/check-token");
-//       console.log("✅ Token válido:", res.data);
-//     } catch (err: any) {
-//       console.error("❌ Token inválido o expirado:", err.response?.status);
-//     }
-//   },
-// };
+  // getFilteredProperties: async (
+  //   filters: {
+  //     // filtros "frontend"
+  //     query?: string;
+  //     location?: string;
+  //     propertyType?: string;    // texto (p.ej. "Casa") -> aquí puede mapearse a category_id
+  //     operationType?: string;   // "Arriendo" | "Venta"
+  //     priceMin?: number | "";
+  //     priceMax?: number | "";
+  //   },
+  //   options?: { signal?: AbortSignal } // opcional: para cancelar la request
+  // ): Promise<FeaturedProperty[]> => {
+  //   // Mapeos si tu backend usa otras keys
+  //   const params: Record<string, string> = {};
+
+  //   // Mapea `query` a `city` o mantén `query` si tu backend lo usa
+  //   if (filters.location?.trim()) params.city = filters.location.trim();
+  //   else if (filters.query?.trim()) {
+  //     // si tu "query" busca en city/address/description, puedes enviarlo como "query"
+  //     params.query = filters.query.trim();
+  //   }
+
+  //   // Mapea operationType (frontend) a transaction_type (backend)
+  //   if (filters.operationType?.trim()) {
+  //     const op = filters.operationType.trim();
+  //     const mapOp: Record<string, string> = { Arriendo: "rent", Venta: "sale" };
+  //     params.transaction_type = mapOp[op] ?? op.toLowerCase();
+  //   }
+
+  //   // Mapea propertyType (texto) a category_id (numérico) si así lo maneja el backend
+  //   if (filters.propertyType?.trim()) {
+  //     const mapCategory: Record<string, string> = {
+  //       Casa: "1",
+  //       Apartamento: "2",
+  //       Local: "3",
+  //       Terreno: "4",
+  //     };
+  //     const cat = mapCategory[filters.propertyType.trim()];
+  //     if (cat) params.category_id = cat;
+  //     else params.property_type = filters.propertyType.trim(); // fallback textual
+  //   }
+
+  //   // Precios
+  //   if (filters.priceMin !== undefined && filters.priceMin !== "") params.min_price = String(filters.priceMin);
+  //   if (filters.priceMax !== undefined && filters.priceMax !== "") params.max_price = String(filters.priceMax);
+
+  //   // Realiza la request con los params y retorna el array de propiedades
+  //   const res = await api.get<PaginatedResponse<FeaturedProperty>>("/properties", {
+  //     params,
+  //     signal: options?.signal,
+  //   });
+  //   return res.data.data;
+  // },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getFilteredProperties: async (filters: Record<string, any> = {}, options?: { signal?: AbortSignal }): Promise<any[]> => {
+    const params: Record<string, string> = {};
+    if (filters.query?.trim()) params.query = filters.query.trim();
+    if (filters.location?.trim()) params.location = filters.location.trim();
+    if (filters.propertyType?.trim()) params.propertyType = filters.propertyType.trim();
+    if (filters.operationType?.trim()) params.operationType = filters.operationType.trim();
+    if (filters.priceMin !== undefined && filters.priceMin !== "") params.price_min = String(filters.priceMin);
+    if (filters.priceMax !== undefined && filters.priceMax !== "") params.price_max = String(filters.priceMax);
+
+    const res = await api.get("/properties/filtered", { params, signal: options?.signal });
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    if (res.data && Array.isArray(res.data.properties)) return res.data.properties;
+    return [];
+  },
+
+  updateProperty: async (id: number | string, payload: PropertyPayload, images?: File[]) => {
+    const hasFiles = Array.isArray(images) && images.length > 0;
+    if (hasFiles) {
+      const form = new FormData();
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        form.append(k, String(v));
+      });
+      images.forEach((file) => form.append("images[]", file));
+      // Laravel: usar _method=PUT en FormData si el endpoint no acepta multipart PUT directo
+      form.append("_method", "PUT");
+      const res = await api.post(`/properties/${id}`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data;
+    } else {
+      const res = await api.put(`/properties/${id}`, payload);
+      return res.data;
+    }
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getCategories: async (): Promise<any[]> => {
+    const res = await api.get("/categories");
+    if (Array.isArray(res.data)) return res.data;
+    if (res.data && Array.isArray(res.data.data)) return res.data.data;
+    return [];
+  },
+};
 
 
 // contratos
@@ -131,7 +238,7 @@ export const contractService = {
     const res = await axios.get<ContractWithRelations[]>(`${API_URL}/contracts`);
     return res.data;
   },
-  
+
 };
 
 // imagenes de proiedad

@@ -137,7 +137,6 @@ const FeaturedProperties: React.FC = () => {
               ))
             ) : (
               <Col className="text-center text-muted">
-                Aún no tienes propiedades registradas.
               </Col>
             )}
           </Row>

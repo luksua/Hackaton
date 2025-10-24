@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class PropertyController extends Controller
 {
     /**
-     * 📋 Listar TODAS las propiedades (vista pública)
+     * Listar TODAS las propiedades (vista pública)
      * GET /api/properties
      */
     public function index(Request $request)
@@ -32,6 +32,25 @@ class PropertyController extends Controller
 
         if ($request->filled('transaction_type')) {
             $query->where('transaction_type', $request->transaction_type);
+        }
+
+        // Filtro de disponibilidad
+        if ($request->has('listing_status')) {
+            $query->where('listing_status', $request->input('listing_status'));
+        }
+
+        // Filtro de tipo de venta
+        if ($request->has('sale_type')) {
+            $query->where('sale_type', $request->input('sale_type'));
+        }
+
+        // Filtro de ubicación (latitud y longitud)
+        if ($request->has('latitude') && $request->has('longitude')) {
+            $latitude = $request->input('latitude');
+            $longitude = $request->input('longitude');
+            $distance = 50; // ejemplo: buscar en un radio de 50 km
+
+            $query->whereRaw("ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) <= ?", [$longitude, $latitude, $distance * 1000]);
         }
 
         $properties = $query->paginate(12);
@@ -113,11 +132,12 @@ class PropertyController extends Controller
             'bathrooms' => 'nullable|integer',
             'is_featured' => 'boolean',
             'status' => 'nullable|string|in:disponible,rentada,inactiva',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096'
         ]);
 
         $data['owner_id'] = auth()->id();
-
         $property = Property::create($data);
 
         if ($request->hasFile('images')) {
@@ -160,6 +180,8 @@ class PropertyController extends Controller
             'bathrooms',
             'is_featured',
             'status',
+            'latitude',
+            'longitude'
         ]));
 
         return response()->json([
@@ -183,5 +205,41 @@ class PropertyController extends Controller
         $property->delete();
 
         return response()->json(['message' => 'Propiedad eliminada correctamente']);
+    }
+
+    public function getFilteredProperties(Request $request)
+    {
+        $q = Property::query()->with(['images', 'category', 'owner']);
+
+        if ($request->filled('query')) {
+            $term = $request->query('query');
+            $q->where(function ($sub) use ($term) {
+                $sub->where('city', 'like', "%{$term}%")
+                    ->orWhere('address', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        if ($request->filled('location')) {
+            $q->where('city', 'like', "%{$request->query('location')}%");
+        }
+
+        // Si tu frontend envía "propertyType" con texto, mapea a category_id si corresponde
+        if ($request->filled('propertyType')) {
+            // ejemplo si mapeas manualmente
+            $map = ['Casa' => 1, 'Apartamento' => 2, 'Local' => 3];
+            $cat = $map[$request->query('propertyType')] ?? null;
+            if ($cat)
+                $q->where('category_id', $cat);
+        }
+
+        if ($request->filled('operationType')) {
+            // Mapea Arriendo/Venta a rent/sale si tu DB guarda así
+            $map = ['Arriendo' => 'rent', 'Venta' => 'sale'];
+            $tx = $map[$request->query('operationType')] ?? $request->query('operationType');
+            $q->where('transaction_type', $tx);
+        }
+
+        return response()->json($q->get(), 200);
     }
 }
